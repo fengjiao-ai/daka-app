@@ -1,0 +1,305 @@
+/* ============================ 基础变量与重置 ============================ */
+:root {
+  --bg: #f4f6fb;
+  --card: #ffffff;
+  --text: #1f2733;
+  --muted: #8a93a6;
+  --primary: #4f8cff;
+  --primary-d: #3b73e0;
+  --green: #43a047;
+  --danger: #e5484d;
+  --line: #e6e9f0;
+  --radius: 16px;
+  --shadow: 0 4px 18px rgba(31, 39, 51, .06);
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.5;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+h1 { font-size: 22px; margin: 0; }
+h2 { font-size: 16px; margin: 0; }
+.muted { color: var(--muted); }
+.empty { color: var(--muted); text-align: center; padding: 22px 0; }
+
+/* ============================ 顶部栏 ============================ */
+.topbar {
+  position: sticky; top: 0; z-index: 20;
+  background: rgba(255, 255, 255, .85);
+  backdrop-filter: saturate(180%) blur(12px);
+  border-bottom: 1px solid var(--line);
+  padding: 14px 18px;
+  display: flex; align-items: center;
+}
+.brand { font-weight: 700; font-size: 17px; }
+
+/* ============================ 视图与页面 ============================ */
+.view { max-width: 720px; margin: 0 auto; padding: 16px 16px 96px; }
+.page { display: flex; flex-direction: column; gap: 16px; }
+.center-page { min-height: 70vh; display: flex; align-items: center; justify-content: center; }
+.page-head { display: flex; align-items: center; justify-content: space-between; }
+
+/* ============================ 首页 Hero ============================ */
+.hero { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.hero-badges { display: flex; flex-direction: column; gap: 8px; }
+.badge {
+  background: var(--card); border: 1px solid var(--line); border-radius: 999px;
+  padding: 6px 12px; font-size: 13px; box-shadow: var(--shadow); white-space: nowrap;
+}
+.badge span { margin-right: 4px; }
+.ring-row { display: flex; gap: 14px; justify-content: space-around; }
+.ring-wrap { display: flex; flex-direction: column; align-items: center; }
+
+/* ============================ 卡片 ============================ */
+.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); }
+.card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.more { display: inline-block; margin-top: 10px; color: var(--primary); font-size: 13px; text-decoration: none; }
+
+/* ============================ 迷你列表 ============================ */
+.mini-list, .task-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.mini-row, .task-row {
+  display: flex; align-items: center; gap: 12px;
+  background: #fafbfe; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px;
+}
+.task-row { cursor: pointer; transition: background .15s; }
+.task-row:active { background: #f0f3fb; }
+.mini-ico, .task-ico { width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; font-size: 18px; flex: 0 0 auto; }
+.mini-main, .task-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.mini-main b, .task-main b { font-size: 14px; }
+.mini-main small, .task-main small { color: var(--muted); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pill { font-size: 12px; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
+.row-actions { display: flex; gap: 4px; }
+.icon-btn { border: none; background: #fff; border: 1px solid var(--line); border-radius: 8px; width: 30px; height: 30px; cursor: pointer; font-size: 14px; }
+.icon-btn.danger { color: var(--danger); }
+
+/* ============================ 成就 ============================ */
+.ach-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.ach { text-align: center; padding: 12px 6px; border-radius: 12px; background: #fafbfe; border: 1px solid var(--line); opacity: .5; }
+.ach.on { opacity: 1; background: linear-gradient(180deg, #eef4ff, #fff); border-color: #cfe0ff; }
+.ach-ico { font-size: 24px; }
+.ach-title { font-size: 12px; margin-top: 4px; }
+
+/* ============================ 按钮 ============================ */
+.btn { border: none; border-radius: 12px; padding: 11px 18px; font-size: 15px; font-weight: 600; cursor: pointer; transition: transform .05s, background .15s; }
+.btn:active { transform: scale(.98); }
+.btn.primary { background: var(--primary); color: #fff; }
+.btn.primary:hover { background: var(--primary-d); }
+.btn.ghost { background: #f0f3fb; color: var(--text); }
+.btn.outline { background: #fff; color: var(--primary); border: 1.5px solid var(--primary); }
+.btn.danger { background: #fff0f0; color: var(--danger); }
+.btn.big { width: 100%; padding: 14px; font-size: 16px; }
+
+/* ============================ 筛选 ============================ */
+.filter-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+.chip { border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 7px 13px; font-size: 13px; white-space: nowrap; cursor: pointer; color: var(--text); }
+.chip.on { background: var(--primary); color: #fff; border-color: var(--primary); }
+.switch { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+
+/* ============================ 表单 ============================ */
+.form { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.form label { font-size: 13px; color: var(--muted); margin-top: 6px; }
+.form input, .form select, .form textarea {
+  border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 15px; font-family: inherit; background: #fff; color: var(--text); width: 100%;
+}
+.form textarea { resize: vertical; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* ============================ 弹窗 ============================ */
+.modal-mask { position: fixed; inset: 0; background: rgba(20, 28, 40, .45); display: flex; align-items: flex-end; justify-content: center; z-index: 100; }
+.modal { background: #fff; width: 100%; max-width: 520px; border-radius: 20px 20px 0 0; padding: 18px; max-height: 88vh; overflow: auto; animation: slideUp .2s ease; }
+@keyframes slideUp { from { transform: translateY(40px); opacity: .6; } to { transform: translateY(0); opacity: 1; } }
+@media (min-width: 600px) { .modal-mask { align-items: center; } .modal { border-radius: 20px; } }
+.modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.modal-x { border: none; background: #f0f3fb; border-radius: 8px; width: 30px; height: 30px; font-size: 18px; cursor: pointer; }
+.modal-foot { display: flex; gap: 10px; margin-top: 14px; }
+.modal-foot .btn { flex: 1; }
+.confirm-msg { margin: 4px 0 0; }
+
+/* ============================ Toast ============================ */
+.toast { position: fixed; left: 50%; bottom: 90px; transform: translateX(-50%) translateY(20px); background: #1f2733; color: #fff; padding: 10px 18px; border-radius: 999px; font-size: 14px; opacity: 0; pointer-events: none; transition: all .25s; z-index: 200; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast-success { background: #2e7d32; }
+.toast-error { background: #c62828; }
+
+/* ============================ 统计卡片 ============================ */
+.stat-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.stat-card { background: #fafbfe; border: 1px solid var(--line); border-radius: 12px; padding: 12px 6px; text-align: center; }
+.stat-card span { font-size: 18px; }
+.stat-card b { display: block; font-size: 16px; margin: 2px 0; }
+.stat-card small { color: var(--muted); font-size: 11px; }
+@media (max-width: 480px) { .stat-cards { grid-template-columns: repeat(2, 1fr); } }
+
+/* ============================ 热力图 ============================ */
+.heatmap { overflow-x: auto; }
+.hm-grid { display: flex; gap: 3px; }
+.hm-week { display: grid; grid-template-rows: repeat(7, 1fr); gap: 3px; }
+.hm-cell { width: 13px; height: 13px; border-radius: 3px; background: #eef1f6; }
+.hm-cell.lvl-1 { background: #bfe0c2; }
+.hm-cell.lvl-2 { background: #74c47d; }
+.hm-cell.lvl-3 { background: #2e9d4a; }
+.hm-cell.future { opacity: .25; }
+.hm-legend { display: flex; align-items: center; gap: 4px; margin-top: 10px; font-size: 12px; color: var(--muted); }
+.hm-legend .hm-cell { width: 11px; height: 11px; }
+
+/* ============================ 欢迎 / 登录 ============================ */
+.welcome { width: 100%; max-width: 380px; text-align: center; display: flex; flex-direction: column; gap: 12px; }
+.welcome-logo { font-size: 56px; }
+.hint { color: var(--muted); font-size: 12px; }
+.seg { display: flex; gap: 10px; }
+.seg .btn { flex: 1; }
+
+/* ============================ 连接状态卡 ============================ */
+.conn-card { border-color: var(--line); }
+.conn-card.ok { border-color: #bfe0c2; background: linear-gradient(180deg, #f3fbf4, #fff); }
+.conn-status { margin: 0 0 10px; font-size: 14px; }
+
+/* ============================ 底部 Tab ============================ */
+.tabbar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
+  background: rgba(255, 255, 255, .92); backdrop-filter: blur(12px);
+  border-top: 1px solid var(--line);
+  display: flex; justify-content: space-around;
+  padding: 8px 4px calc(8px + env(safe-area-inset-bottom));
+  max-width: 720px; margin: 0 auto;
+}
+.tab { flex: 1; text-align: center; text-decoration: none; color: var(--muted); font-size: 11px; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 0; }
+.tab span { font-size: 20px; }
+.tab.active { color: var(--primary); font-weight: 600; }
+body:not(.in-app) .tabbar { display: none; }
+
+/* ============================ 宠物动画 ============================ */
+@keyframes petBounce { 0%,100%{transform:translateY(0)} 30%{transform:translateY(-12px)} 60%{transform:translateY(-4px)} }
+@keyframes petWiggle { 0%,100%{transform:rotate(0)} 20%{transform:rotate(-8deg)} 40%{transform:rotate(8deg)} 60%{transform:rotate(-4deg)} 80%{transform:rotate(4deg)} }
+@keyframes petFloat { 0%,100%{transform:translateY(0) rotate(0)} 25%{transform:translateY(-6px) rotate(2deg)} 50%{transform:translateY(0) rotate(0)} 75%{transform:translateY(-3px) rotate(-2deg)} }
+@keyframes petPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
+@keyframes petHop { 0%,100%{transform:translateY(0) scale(1,0.95)} 20%{transform:translateY(-18px) scale(1.05,0.9)} 40%{transform:translateY(2px) scale(0.95,1.05)} 60%{transform:translateY(-8px) scale(1.02,0.98)} 80%{transform:translateY(0) scale(1,1)} }
+.pet-anim { display: inline-block; animation-duration: 1.5s; animation-iteration-count: infinite; animation-timing-function: ease-in-out; }
+.pet-bounce { animation-name: petBounce; animation-duration: 0.8s; }
+.pet-wiggle { animation-name: petWiggle; animation-duration: 1.2s; }
+.pet-float { animation-name: petFloat; animation-duration: 2.5s; }
+.pet-pulse { animation-name: petPulse; animation-duration: 1.5s; }
+.pet-hop { animation-name: petHop; animation-duration: 0.5s; }
+
+/* ============================ 金币 / 奖励商店 ============================ */
+.coin-banner { background: linear-gradient(135deg,#ffcc0033,#ff950022); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 16px; text-align: center; box-shadow: var(--shadow); }
+.coin-label { font-size: 13px; color: var(--muted); }
+.coin-num { font-size: 44px; font-weight: 800; color: #ff9500; line-height: 1.1; margin: 4px 0; }
+.coin-hint { font-size: 12px; color: var(--muted); }
+
+.reward-item { display: flex; align-items: center; gap: 14px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px; box-shadow: var(--shadow); }
+.reward-item.disabled { opacity: .55; }
+.reward-ico { width: 54px; height: 54px; border-radius: 14px; display: grid; place-items: center; font-size: 28px; flex: 0 0 auto; }
+.reward-info { flex: 1; min-width: 0; }
+.reward-name { font-size: 16px; font-weight: 700; }
+.reward-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.reward-cost { font-size: 13px; font-weight: 600; margin-top: 4px; }
+.reward-minus { font-size: 14px; font-weight: 700; color: var(--danger); flex: 0 0 auto; }
+
+/* ============================ 家务 ============================ */
+.chore-top { display: flex; align-items: center; gap: 12px; text-align: left; }
+.chore-emoji { font-size: 40px; }
+.chore-title { font-size: 18px; font-weight: 700; }
+.chore-sub { font-size: 13px; color: var(--muted); margin-top: 2px; }
+.chore-reward { font-size: 12px; color: var(--primary); margin-top: 8px; text-align: left; }
+.progress-bar { height: 10px; background: #eef1f6; border-radius: 999px; overflow: hidden; margin-top: 10px; }
+.progress-bar .fill { height: 100%; border-radius: 999px; transition: width .5s; }
+
+.chore-row { display: flex; align-items: center; gap: 12px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; box-shadow: var(--shadow); cursor: pointer; }
+.chore-row.done { background: rgba(52,199,89,.06); }
+.chore-ico { font-size: 34px; flex: 0 0 auto; }
+.chore-info { flex: 1; min-width: 0; }
+.chore-name { font-size: 16px; font-weight: 700; }
+.chore-row.done .chore-name { color: var(--muted); text-decoration: line-through; }
+.chore-coin { font-size: 13px; color: #ff9500; font-weight: 600; }
+.chore-toggle { width: 42px; height: 42px; border-radius: 50%; border: none; font-size: 20px; flex: 0 0 auto; cursor: pointer; background: var(--line); color: var(--muted); }
+.chore-toggle.on { background: var(--green); color: #fff; }
+
+.center-card { text-align: center; }
+.btn.dashed { border: 1.5px dashed var(--line); background: transparent; color: var(--primary); }
+.btn.full { width: 100%; }
+.foot-hint { font-size: 12px; color: var(--muted); text-align: center; margin: 4px 0 0; }
+
+/* 奖励兑换记录里的行信息 */
+.task-info { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.task-info .tt { font-size: 14px; font-weight: 600; }
+.task-meta { font-size: 12px; color: var(--muted); }
+.meta-text { font-size: 12px; color: var(--muted); }
+
+/* ============================ 底部 Tab（多标签横向滚动） ============================ */
+.tabbar { overflow-x: auto; justify-content: flex-start; }
+.tab { flex: 0 0 auto; min-width: 58px; }
+
+/* ============================ 运动打卡新样式 ============================ */
+.head-right { display: flex; align-items: center; gap: 10px; }
+.head-time { font-size: 15px; color: var(--muted); font-weight: 600; font-variant-numeric: tabular-nums; }
+.btn-circle { width: 40px !important; height: 40px !important; border-radius: 50% !important; padding: 0 !important; font-size: 22px !important; display: grid; place-items: center; }
+
+/* 今日概览卡片 */
+.ex-summary-card { padding: 20px; overflow: hidden; }
+.ex-summary-head { font-size: 17px; font-weight: 700; margin-bottom: 16px; color: var(--text); }
+.ex-summary-body { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.ex-summary-left { flex: 1; min-width: 0; }
+.ex-summary-right { flex: 0 0 auto; }
+
+.ex-label { font-size: 14px; color: var(--muted); margin-bottom: 4px; }
+.ex-minutes { font-size: 42px; font-weight: 800; color: #ff9500; line-height: 1.1; margin-bottom: 2px; }
+.ex-minutes small { font-size: 18px; font-weight: 600; color: #ff9500; margin-left: 2px; }
+.ex-goal { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+
+.ex-progress-track { height: 8px; background: #eef1f6; border-radius: 999px; overflow: hidden; margin-bottom: 14px; }
+.ex-progress-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #ff9500, #ffcc00); transition: width .5s ease; min-width: 0; }
+
+.ex-stats-row { display: flex; gap: 24px; }
+.ex-stat-cal { font-size: 14px; color: var(--danger); }
+.ex-stat-cal b { font-weight: 700; }
+.ex-stat-count { font-size: 14px; color: var(--green); }
+.ex-stat-count b { font-weight: 700; }
+
+/* 筛选栏 */
+.ex-filter-bar { display: flex; align-items: center; gap: 8px; margin: 4px 0 8px; }
+.ex-filter-label { font-size: 15px; font-weight: 600; color: var(--text); }
+
+/* Toggle 开关 */
+.toggle-switch { position: relative; width: 46px; height: 26px; cursor: pointer; flex-shrink: 0; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-slider {
+  position: absolute; inset: 0; background: #ddd; border-radius: 999px;
+  transition: background .25s; cursor: pointer;
+}
+.toggle-slider::before {
+  content: ''; position: absolute; width: 20px; height: 20px; left: 3px; top: 3px;
+  background: #fff; border-radius: 50%; transition: transform .25s; box-shadow: 0 1px 4px rgba(0,0,0,.15);
+}
+.toggle-switch.on .toggle-slider { background: #43a047; }
+.toggle-switch.on .toggle-slider::before { transform: translateX(20px); }
+.toggle-text { font-size: 14px; color: var(--muted); }
+
+/* 分类标签（运动页专用） */
+.ex-chips { padding: 8px 0 12px; }
+
+/* 空状态 */
+.ex-empty { text-align: center; padding: 48px 20px 32px; }
+.ex-empty-art { font-size: 64px; line-height: 1; margin-bottom: 16px; animation: petBounce 1.5s ease-in-out infinite; }
+.ex-empty-title { font-size: 17px; font-weight: 700; color: var(--text); margin: 0 0 6px; }
+.ex-empty-hint { font-size: 13px; color: var(--muted); margin: 0; }
+
+/* ============================ 宠物3D加载动画 ============================ */
+.pet3d-skeleton { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 12px; }
+.pet3d-emoji-fallback { font-size: 72px; animation: petBounce 1.5s ease-in-out infinite; line-height: 1; }
+.pet3d-load-bar { width: 120px; height: 4px; background: #eef1f6; border-radius: 999px; overflow: hidden; }
+.pet3d-load-fill { width: 30%; height: 100%; background: linear-gradient(90deg, #4f8cff, #43a047); border-radius: 999px; animation: loadShimmer 1.5s ease-in-out infinite; }
+@keyframes loadShimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(350%)} }
+.pet3d-load-text { font-size: 12px; color: var(--muted); }
+
+/* 宠物状态条刷新闪烁动画 */
+.pet-stat-flash { animation: statFlash 0.5s ease-out; }
+@keyframes statFlash {
+  0% { background: rgba(79,140,255,0.12); border-radius: 8px; }
+  100% { background: transparent; }
+}
