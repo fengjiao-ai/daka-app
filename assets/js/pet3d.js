@@ -1,5 +1,6 @@
 import * as THREE from 'https://esm.sh/three@0.160.0';
 import { GLTFLoader } from 'https://esm.sh/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'https://esm.sh/three@0.160.0/examples/jsm/loaders/DRACOLoader.js';
 
 /* ===================== 3D Pet Model Viewer ===================== *
  * 为7种宠物构建程序化3D模型，使用Three.js原生几何体组合。
@@ -9,6 +10,11 @@ import { GLTFLoader } from 'https://esm.sh/three@0.160.0/examples/jsm/loaders/GL
 
 /* ---------- GLB 模型加载器 ---------- */
 const gltfLoader = new GLTFLoader();
+// Draco 解码器：用于加载压缩过的 GLB（解码器从 Google CDN 拉取，无需打包）
+const dracoLoader = new DRACOLoader();
+dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+dracoLoader.setDecoderConfig({ type: 'js' });
+gltfLoader.setDRACOLoader(dracoLoader);
 
 /* ---------- 材质工厂 ---------- */
 function mat(color, roughness = 0.6, metalness = 0) {
