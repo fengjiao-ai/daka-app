@@ -67,6 +67,49 @@ function defaultPetData(type) {
   };
 }
 
+// ============================================================================
+// 数据读取 + 时间衰减「结算」
+// 关键：衰减结果必须落库。否则互动操作会重新读到未衰减的旧值，
+// 造成「点一次投喂，三条状态条一起跳回 100%」的数值跳变。
+// ============================================================================
+const DECAY_PER_HOUR = { hunger: 10, happiness: 8, cleanliness: 5 };
+const SETTLE_MIN_HOURS = 0.05; // 不足约 3 分钟不结算，避免无意义的频繁写库
+
+/** 数值兜底：null/undefined/空串 取默认值（不能用 || ，否则 0 会被误判成默认值） */
+function numOr(v, d) {
+  return v == null || v === '' ? d : Number(v);
+}
+
+/**
+ * 读取宠物并「结算」从上次互动到现在的状态衰减（结算结果写回存储）。
+ * 页面渲染与所有互动操作都必须走此函数，保证「存储值 == 界面值」。
+ * @returns {Promise<object|null>} 结算后的宠物数据
+ */
+async function loadPetSettled() {
+  const pet = await getPet();
+  if (!pet || !pet.type) return pet;
+
+  const now = Date.now();
+  const last = pet.last_fed ? new Date(pet.last_fed).getTime() : now;
+  const elapsedHours = Math.max(0, (now - last) / 1000 / 60 / 60);
+  // 时间过短不结算：此时不写入，界面直接用存储值，二者依然一致
+  if (elapsedHours < SETTLE_MIN_HOURS) return pet;
+
+  const before = [numOr(pet.hunger, 100), numOr(pet.happiness, 100), numOr(pet.cleanliness, 100)];
+  pet.hunger = Math.max(0, before[0] - elapsedHours * DECAY_PER_HOUR.hunger);
+  pet.happiness = Math.max(0, before[1] - elapsedHours * DECAY_PER_HOUR.happiness);
+  pet.cleanliness = Math.max(0, before[2] - elapsedHours * DECAY_PER_HOUR.cleanliness);
+  // 结算后把衰减基准重置为当前时间，避免下次读取时重复扣减
+  pet.last_fed = new Date().toISOString();
+
+  const after = [pet.hunger, pet.happiness, pet.cleanliness];
+  if (before.some((v, i) => Math.abs(v - after[i]) > 0.01)) {
+    try { await savePet(pet); }
+    catch (e) { console.warn('[pet] 衰减结算写库失败：', e.message); }
+  }
+  return pet;
+}
+
 // ---- 状态条渲染（带颜色 + 刷新动画）----
 function petStatBar(label, value, emoji) {
   const pct = Math.max(0, Math.min(100, Math.round(value)));
@@ -90,20 +133,9 @@ function petStatBar(label, value, emoji) {
 // 页面渲染
 // ============================================================================
 export async function renderPet(ctx) {
-  let pet = await getPet();
+  // 读取宠物并结算时间衰减（结算结果落库，保证界面值与存储值一致）
+  const pet = await loadPetSettled();
   const student = await getStudent();
-
-  // ---- 时间衰减：根据上次互动时间计算状态下降 ----
-  if (pet && pet.last_fed) {
-    const now = Date.now();
-    const last = new Date(pet.last_fed).getTime();
-    const elapsedHours = (now - last) / 1000 / 60 / 60;
-    if (elapsedHours > 0) {
-      pet.hunger = Math.max(0, Number(pet.hunger) - elapsedHours * 10);
-      pet.happiness = Math.max(0, Number(pet.happiness) - elapsedHours * 8);
-      pet.cleanliness = Math.max(0, (Number(pet.cleanliness) || 100) - elapsedHours * 5);
-    }
-  }
 
   // ---- 没有宠物：显示领养页（清理 3D）----
   if (!pet || !pet.type) {
@@ -163,9 +195,9 @@ export async function renderPet(ctx) {
 
     <!-- 状态区 -->
     <div class="card">
-      <div id="pet-stat-hunger">${petStatBar('饱食度', pet.hunger, '😋')}</div>
-      <div id="pet-stat-happiness">${petStatBar('心情值', pet.happiness, '😊')}</div>
-      <div id="pet-stat-cleanliness">${petStatBar('清洁度', pet.cleanliness || 100, '🧼')}</div>
+      <div id="pet-stat-hunger">${petStatBar('饱食度', numOr(pet.hunger, 100), '😋')}</div>
+      <div id="pet-stat-happiness">${petStatBar('心情值', numOr(pet.happiness, 100), '😊')}</div>
+      <div id="pet-stat-cleanliness">${petStatBar('清洁度', numOr(pet.cleanliness, 100), '🧼')}</div>
 
       <div style="display:flex;gap:10px;margin-top:14px;">
         <button class="btn primary" id="feed-btn" style="flex:1;${foodInv <= 0 ? 'opacity:0.5;' : ''}" ${foodInv <= 0 ? 'disabled' : ''}>
@@ -307,46 +339,48 @@ async function doAbandon(ctx) {
 }
 
 async function doFeed(ctx) {
-  let pet = await getPet();
+  // 先结算衰减，拿到与界面一致的当前值再增减，避免数值跳变
+  const pet = await loadPetSettled();
   if (!pet || !pet.food_inv || pet.food_inv <= 0) { toast('没有宠物粮食了，去商店买一点吧'); return; }
   pet.food_inv = (pet.food_inv || 0) - 1;
-  pet.hunger = Math.min(100, Number(pet.hunger) + 25);
+  pet.hunger = Math.min(100, numOr(pet.hunger, 100) + 25);
   pet.last_fed = new Date().toISOString();
   await savePet(pet);
-  refreshPetStats(ctx, pet, 'hunger');
+  refreshPetStats(ctx, pet, ['hunger']); // 只刷新饱食度，心情/清洁保持原样
   toast('投喂成功! 🍖');
 }
 
 async function doPlay(ctx) {
-  let pet = await getPet();
+  const pet = await loadPetSettled();
   if (!pet) return;
-  pet.happiness = Math.min(100, Number(pet.happiness) + 20);
+  pet.happiness = Math.min(100, numOr(pet.happiness, 100) + 20);
   pet.last_fed = new Date().toISOString();
   await savePet(pet);
-  refreshPetStats(ctx, pet, 'happiness');
+  refreshPetStats(ctx, pet, ['happiness']);
   toast('玩得真开心! 🎾');
 }
 
 async function doBathe(ctx) {
-  let pet = await getPet();
+  const pet = await loadPetSettled();
   if (!pet) return;
-  pet.cleanliness = Math.min(100, (Number(pet.cleanliness) || 100) + 30);
-  pet.happiness = Math.min(100, Number(pet.happiness) + 10);
+  pet.cleanliness = Math.min(100, numOr(pet.cleanliness, 100) + 30);
+  pet.happiness = Math.min(100, numOr(pet.happiness, 100) + 10);
   pet.last_fed = new Date().toISOString();
   await savePet(pet);
-  refreshPetStats(ctx, pet, 'cleanliness');
+  refreshPetStats(ctx, pet, ['cleanliness', 'happiness']); // 洗澡确实同时影响这两项
   toast('洗得干干净净! 🛁');
 }
 
 async function buyFood(ctx, item) {
   const student = await getStudent();
   if (student.totalPoints < item.cost) { toast('金币不足'); return; }
+  const pet = await loadPetSettled();
+  if (!pet) { toast('还没有宠物哦'); return; }
   student.totalPoints -= item.cost;
   await saveStudent({ total_points: student.totalPoints });
-  let pet = await getPet();
   pet.food_inv = (pet.food_inv || 0) + 1;
   await savePet(pet);
-  refreshPetStats(ctx, pet);
+  refreshPetStats(ctx, pet, []); // 买粮食不改状态，仅刷新库存/按钮
   updateSidebarPoints(student.totalPoints);
   toast(`购买成功! ${item.icon} ${item.key}`);
 }
@@ -356,7 +390,8 @@ async function buyEquip(ctx, item) {
   if (student.totalPoints < item.cost) { toast('金币不足'); return; }
   student.totalPoints -= item.cost;
   await saveStudent({ total_points: student.totalPoints });
-  let pet = await getPet();
+  const pet = await loadPetSettled();
+  if (!pet) { toast('还没有宠物哦'); return; }
   if (!pet.equipment) pet.equipment = [];
   pet.equipment.push(item);
   await savePet(pet);
@@ -366,35 +401,43 @@ async function buyEquip(ctx, item) {
 }
 
 async function unequipEquip(ctx, item) {
-  let pet = await getPet();
+  const pet = await loadPetSettled();
+  if (!pet) return;
   pet.equipment = (pet.equipment || []).filter(e => e.key !== item.key);
   await savePet(pet);
   toast('已卸下');
   renderPet(ctx); // 重启 3D 更新装扮
 }
 
-// ---- 辅助：刷新状态条（不重绘整个页面，仅闪烁指定项）----
-/** @param {'hunger'|'happiness'|'cleanliness'|null} changed - 哪个值变化了，null=不闪烁 */
-function refreshPetStats(ctx, pet, changed = null) {
-  const elH = ctx.viewEl.querySelector('#pet-stat-hunger');
-  const elHp = ctx.viewEl.querySelector('#pet-stat-happiness');
-  const elC = ctx.viewEl.querySelector('#pet-stat-cleanliness');
-  if (elH) elH.innerHTML = petStatBar('饱食度', pet.hunger, '😋');
-  if (elHp) elHp.innerHTML = petStatBar('心情值', pet.happiness, '😊');
-  if (elC) elC.innerHTML = petStatBar('清洁度', pet.cleanliness || 100, '🧼');
+// ---- 辅助：刷新状态条（只重绘「发生变化」的项，其余保持界面原值不动）----
+/**
+ * @param {object|null} pet 结算后的宠物数据
+ * @param {string[]} changedKeys 本次发生变化的状态项，只重绘并闪烁这些项；
+ *        传空数组表示本次操作不涉及状态（仅刷新投喂按钮/库存/金币）
+ */
+function refreshPetStats(ctx, pet, changedKeys = []) {
+  const statMap = {
+    hunger:      { sel: '#pet-stat-hunger',      label: '饱食度', emoji: '😋', value: numOr(pet?.hunger, 100) },
+    happiness:   { sel: '#pet-stat-happiness',   label: '心情值', emoji: '😊', value: numOr(pet?.happiness, 100) },
+    cleanliness: { sel: '#pet-stat-cleanliness', label: '清洁度', emoji: '🧼', value: numOr(pet?.cleanliness, 100) },
+  };
 
-  // 仅对变化的状态条做闪烁动画
-  const targetMap = { hunger: elH, happiness: elHp, cleanliness: elC };
-  const target = changed ? targetMap[changed] : null;
-  if (target) {
-    const row = target.querySelector('.pet-stat-row') || target.firstElementChild;
+  // 仅重绘变化项：避免「投喂顺手把心情/清洁也刷新」造成的数值跳变
+  (Array.isArray(changedKeys) ? changedKeys : [changedKeys]).forEach((key) => {
+    const item = statMap[key];
+    if (!item) return;
+    const el = ctx.viewEl.querySelector(item.sel);
+    if (!el) return;
+    el.innerHTML = petStatBar(item.label, item.value, item.emoji);
+    const row = el.querySelector('.pet-stat-row') || el.firstElementChild;
     if (row) { row.classList.add('pet-stat-flash'); setTimeout(() => row.classList.remove('pet-stat-flash'), 500); }
-    const fill = target.querySelector('.pet-stat-fill');
+    const fill = el.querySelector('.pet-stat-fill');
     if (fill) { fill.style.boxShadow = '0 0 8px currentColor'; setTimeout(() => { fill.style.boxShadow = ''; }, 500); }
-  }
+  });
 
+  // 投喂按钮 / 粮食库存 / 金币：与状态无关，始终刷新
   const fb = ctx.viewEl.querySelector('#feed-btn');
-  const fi = pet.food_inv || 0;
+  const fi = pet?.food_inv || 0;
   if (fb) { fb.textContent = `🍖 投喂 (${fi}份)`; fb.disabled = fi <= 0; fb.style.opacity = fi > 0 ? '1' : '0.5'; }
   const fil = ctx.viewEl.querySelector('#food-inv-label');
   if (fil) fil.textContent = fi;
