@@ -43,6 +43,35 @@ function defaultStudent() {
 }
 
 // ---------------------------------------------------------------------------
+// 积分字段统一 + 变更广播
+// ---------------------------------------------------------------------------
+// 历史代码中 total_points(数据库列) 与 totalPoints(JS 字段) 混用，本地模式下
+// saveStudent 又删掉了 total_points，导致部分页面读到 undefined 显示 0 积分。
+// 这里强制两者恒等，杜绝字段名不一致造成的显示错误。
+function normalizeStudent(s) {
+  if (!s || typeof s !== 'object') return s;
+  const v = s.total_points != null ? Number(s.total_points)
+    : (s.totalPoints != null ? Number(s.totalPoints) : 0);
+  s.total_points = Number.isFinite(v) ? v : 0;
+  s.totalPoints = s.total_points;
+  return s;
+}
+
+/** 读取积分（兼容两种字段名，永远返回数字） */
+export function pointsOf(student) {
+  const raw = student?.total_points ?? student?.totalPoints;
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : 0;
+}
+
+/** 广播「资料/积分已变更」，界面据此局部刷新，无需整页重载 */
+function emitStudentChanged(student) {
+  try {
+    window.dispatchEvent(new CustomEvent('ssc:student-changed', { detail: { student } }));
+  } catch (_) { /* 非浏览器环境忽略 */ }
+}
+
+// ---------------------------------------------------------------------------
 // 学生资料
 // ---------------------------------------------------------------------------
 export async function getStudent() {
@@ -60,12 +89,12 @@ export async function getStudent() {
         if (error) throw new Error(error.message);
         data = inserted;
       }
-      return { ...data, totalPoints: data.total_points ?? 0 };
+      return normalizeStudent({ ...data, totalPoints: data.total_points ?? 0 });
     } catch (e) {
       // 云端读取失败：降级为本地默认值，避免整页白屏。
       console.warn('[api] getStudent 云端读取失败，使用默认资料（请检查 profiles 表结构）：', e.message);
       const local = lsGet(LS.student, {});
-      return { id: 'local-fallback', user_id: userId, name: local?.name || '同学', grade: local?.grade || '高一', study_goal_minutes: 120, exercise_goal_minutes: 30, streak_goal_days: 7, totalPoints: Number(local?.totalPoints) || 0 };
+      return normalizeStudent({ id: 'local-fallback', user_id: userId, name: local?.name || '同学', grade: local?.grade || '高一', study_goal_minutes: 120, exercise_goal_minutes: 30, streak_goal_days: 7, totalPoints: Number(local?.totalPoints) || 0 });
     }
   }
   let s = lsGet(LS.student, null);
@@ -73,8 +102,7 @@ export async function getStudent() {
     s = defaultStudent();
     lsSet(LS.student, s);
   }
-  if (s.totalPoints == null) s.totalPoints = 0;
-  return s;
+  return normalizeStudent(s);
 }
 
 export async function saveStudent(patch) {
@@ -93,23 +121,25 @@ export async function saveStudent(patch) {
       res = await sb.from('profiles').insert(row).select().single();
     }
     if (res.error) throw new Error(res.error.message);
-    return { ...res.data, totalPoints: res.data.total_points ?? 0 };
+    const saved = normalizeStudent({ ...res.data, totalPoints: res.data.total_points ?? 0 });
+    emitStudentChanged(saved);
+    return saved;
   }
   const s = { ...defaultStudent(), ...lsGet(LS.student, {}), ...patch };
   if (patch.totalPoints != null) s.totalPoints = patch.totalPoints;
   if (patch.total_points != null) s.totalPoints = patch.total_points;
-  delete s.total_points;
-  if (s.totalPoints == null) s.totalPoints = 0;
-  lsSet(LS.student, s);
-  return s;
+  const saved = normalizeStudent(s);
+  lsSet(LS.student, saved);
+  emitStudentChanged(saved);
+  return saved;
 }
 
 // 调整金币余额（宠物/奖励/家务共用）。返回最新余额。
 export async function addPoints(delta) {
   const s = await getStudent();
-  const next = Math.max(0, (s.totalPoints || 0) + delta);
-  await saveStudent({ total_points: next });
-  return next;
+  const next = Math.max(0, pointsOf(s) + delta);
+  const saved = await saveStudent({ total_points: next });
+  return pointsOf(saved);
 }
 
 // ---------------------------------------------------------------------------

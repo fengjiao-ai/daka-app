@@ -14,8 +14,8 @@ export function renderSettings(ctx) {
   const { student, studyTasks, exerciseRecords } = ctx.state;
   const doneStudy = studyTasks.filter((t) => t.status === 'done').length;
   const exCount = exerciseRecords.length;
-  // 统一使用 student.total_points（金币余额），与首页/金币兑换页一致
-  const points = Number(student.total_points) || 0;
+  // 统一用 pointsOf() 取金币余额，与首页/金币兑换页一致
+  const points = api.pointsOf(student);
   const streak = computeStreak([...studyTasks.filter((t) => t.status === 'done').map((t) => t.started_at), ...exerciseRecords.map((t) => t.recorded_at)]);
   const ach = computeAchievements({ doneStudy, exCount, streak, points });
 
@@ -61,7 +61,7 @@ export function renderSettings(ctx) {
 
     <div class="card">
       <div class="card-head"><h2>积分与成就</h2></div>
-      <div class="stat-cards"><div class="stat-card"><span>🪙</span><b>${points}</b><small>金币余额</small></div>
+      <div class="stat-cards"><div class="stat-card"><span>🪙</span><b data-points>${points}</b><small>金币余额</small></div>
         <div class="stat-card"><span>🔥</span><b>${streak}</b><small>连续打卡</small></div></div>
       <div class="ach-grid">
         ${ACHIEVEMENTS.map((a, i) => `<div class="ach ${ach[i] ? 'on' : ''}" title="${a.desc}">

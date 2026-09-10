@@ -4,7 +4,7 @@
 // 懒加载：只有用户访问宠物页时才加载 Three.js + 50MB GLB
 // ============================================================================
 import { toast } from '../ui.js';
-import { getPet, savePet, deletePet, getStudent, saveStudent } from '../api.js';
+import { getPet, savePet, deletePet, getStudent, saveStudent, pointsOf } from '../api.js';
 
 // 懒加载标记：pet3d.js 是否已加载
 let _pet3dLoaded = false;
@@ -224,7 +224,7 @@ export async function renderPet(ctx) {
     <h3 class="card-title">🏪 宠物粮食商店</h3>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
       ${FOODS.map(f => {
-        const can = student.totalPoints >= f.cost;
+        const can = pointsOf(student) >= f.cost;
         return `<div class="card" style="text-align:center;padding:12px 8px;margin:0;${can ? '' : 'opacity:0.5;'}">
           <div style="font-size:32px;">${f.icon}</div>
           <div style="font-size:13px;font-weight:600;">${f.key}</div>
@@ -240,7 +240,7 @@ export async function renderPet(ctx) {
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
       ${EQUIPS.map(eq => {
         const owned = equips.some(e => e.key === eq.key);
-        const can = student.totalPoints >= eq.cost && !owned;
+        const can = pointsOf(student) >= eq.cost && !owned;
         return `<div class="card" style="text-align:center;padding:12px 8px;margin:0;${owned ? 'background:rgba(52,199,89,0.06);' : (!can ? 'opacity:0.5;' : '')}">
           <div style="font-size:32px;">${eq.icon}</div>
           <div style="font-size:13px;font-weight:600;">${eq.key}</div>
@@ -373,29 +373,28 @@ async function doBathe(ctx) {
 
 async function buyFood(ctx, item) {
   const student = await getStudent();
-  if (student.totalPoints < item.cost) { toast('金币不足'); return; }
+  const cur = pointsOf(student);
+  if (cur < item.cost) { toast('金币不足'); return; }
   const pet = await loadPetSettled();
   if (!pet) { toast('还没有宠物哦'); return; }
-  student.totalPoints -= item.cost;
-  await saveStudent({ total_points: student.totalPoints });
+  // saveStudent 会广播 ssc:student-changed，侧边栏与首页积分随之同步刷新
+  await saveStudent({ total_points: cur - item.cost });
   pet.food_inv = (pet.food_inv || 0) + 1;
   await savePet(pet);
   refreshPetStats(ctx, pet, []); // 买粮食不改状态，仅刷新库存/按钮
-  updateSidebarPoints(student.totalPoints);
   toast(`购买成功! ${item.icon} ${item.key}`);
 }
 
 async function buyEquip(ctx, item) {
   const student = await getStudent();
-  if (student.totalPoints < item.cost) { toast('金币不足'); return; }
-  student.totalPoints -= item.cost;
-  await saveStudent({ total_points: student.totalPoints });
+  const cur = pointsOf(student);
+  if (cur < item.cost) { toast('金币不足'); return; }
   const pet = await loadPetSettled();
   if (!pet) { toast('还没有宠物哦'); return; }
+  await saveStudent({ total_points: cur - item.cost });
   if (!pet.equipment) pet.equipment = [];
   pet.equipment.push(item);
   await savePet(pet);
-  updateSidebarPoints(student.totalPoints);
   toast(`装扮成功! ${item.icon} ${item.key}`);
   renderPet(ctx); // 重启 3D 以显示新装扮
 }
@@ -441,7 +440,7 @@ function refreshPetStats(ctx, pet, changedKeys = []) {
   if (fb) { fb.textContent = `🍖 投喂 (${fi}份)`; fb.disabled = fi <= 0; fb.style.opacity = fi > 0 ? '1' : '0.5'; }
   const fil = ctx.viewEl.querySelector('#food-inv-label');
   if (fil) fil.textContent = fi;
-  getStudent().then(s => updateSidebarPoints(s.totalPoints));
+  getStudent().then(s => updateSidebarPoints(pointsOf(s)));
 }
 
 function updateSidebarPoints(points) {

@@ -2,6 +2,7 @@
 // 统计分析
 // ============================================================================
 import { openModal, toast } from '../ui.js';
+import { pointsOf } from '../api.js';
 import {
   SUBJECTS, SUBJECT_MAP, EXERCISES, EXERCISE_MAP, INTENSITY,
   formatDuration, computeStreak, esc,
@@ -67,7 +68,7 @@ export async function renderStatistics(ctx) {
   const totalStudy = sTasks.reduce((s, t) => s + (Number(t.duration_minutes) || 0), 0);
   const totalEx = eRecs.reduce((s, t) => s + (Number(t.duration_minutes) || 0), 0);
   const doneStudy = studyTasks.filter((t) => t.status === 'done').length;
-  const points = student?.totalPoints || 0;
+  const points = pointsOf(student);
   const streak = computeStreak([...studyTasks.filter((t) => t.status === 'done').map((t) => t.started_at), ...exerciseRecords.map((t) => t.recorded_at)]);
 
   const rangeBtns = ['week', 'month', 'all'].map((r) => `<button class="chip ${range === r ? 'on' : ''}" data-range="${r}">${{ week: '本周', month: '本月', all: '全部' }[r]}</button>`).join('');
@@ -81,7 +82,7 @@ export async function renderStatistics(ctx) {
       <div class="stat-card"><span>📚</span><b>${formatDuration(totalStudy)}</b><small>学习时长</small></div>
       <div class="stat-card"><span>🏃</span><b>${formatDuration(totalEx)}</b><small>运动时长</small></div>
       <div class="stat-card"><span>✅</span><b>${doneStudy}</b><small>完成学习</small></div>
-      <div class="stat-card"><span>⭐</span><b>${points}</b><small>积分</small></div>
+      <div class="stat-card"><span>⭐</span><b data-points>${points}</b><small>积分</small></div>
     </div>
 
     <div class="card">

@@ -25,9 +25,19 @@ const ctx = {
   viewEl,
   toast, openModal, closeModal, confirmDialog, progressRing,
   reload, refresh, navigate, signOut, boot, afterLogin,
+  refreshStudent, syncPointsUI,
 };
 
 function navigate(hash) { location.hash = hash; }
+
+// 只拉最新资料（轻量），用于切换页面时刷新积分/金币，避免显示旧值
+async function refreshStudent() {
+  try {
+    state.student = await api.getStudent();
+  } catch (e) {
+    console.warn('[main] 刷新资料失败：', e.message);
+  }
+}
 
 async function reload() {
   state.student = await api.getStudent();
@@ -35,6 +45,23 @@ async function reload() {
   state.exerciseRecords = await api.listExerciseRecords();
   refresh();
 }
+
+// 把最新积分写入页面上所有带 data-points 的元素（局部刷新，不重绘整页）
+function syncPointsUI() {
+  const pts = api.pointsOf(state.student);
+  document.querySelectorAll('[data-points]').forEach((el) => {
+    const tpl = el.getAttribute('data-points-tpl');
+    el.textContent = tpl ? tpl.replace('{n}', pts) : String(pts);
+  });
+  const sb = document.getElementById('sidebar-points');
+  if (sb) sb.textContent = '🪙' + pts;
+}
+
+// 任何页面改动积分后（打卡/家务/兑换/宠物消费），立即同步到当前界面
+window.addEventListener('ssc:student-changed', (e) => {
+  if (e?.detail?.student) state.student = e.detail.student;
+  syncPointsUI();
+});
 
 function refresh() {
   const route = currentRoute();
@@ -102,7 +129,11 @@ async function route() {
   const ok = await ensureAppData();
   if (!ok) return; // ensureAppData 已重定向
   if (!APP[r]) { location.hash = '#/home'; return; }
+  // 每次进入页面都重新拉取资料：否则在别处（宠物消费/家务/兑换）产生的积分
+  // 变化不会反映到当前页面，首页会一直显示旧积分。
+  await refreshStudent();
   renderView(r);
+  syncPointsUI();
 }
 
 async function signOut() {

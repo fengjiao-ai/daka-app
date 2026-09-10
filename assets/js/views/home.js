@@ -6,7 +6,7 @@ import {
   SUBJECT_MAP, EXERCISE_MAP, STATUS, INTENSITY, ACHIEVEMENTS,
   greeting, formatDuration, fmtDateTime, isToday, computeStreak, esc,
 } from '../utils.js';
-import { getStudent } from '../api.js';
+import { getStudent, pointsOf } from '../api.js';
 
 export function renderHome(ctx) {
   const { student, studyTasks, exerciseRecords } = ctx.state;
@@ -27,9 +27,9 @@ export function renderHome(ctx) {
 
   const doneStudy = studyTasks.filter((t) => t.status === 'done').length;
   const exCount = exerciseRecords.length;
-  // 金币余额：统一使用 student.total_points（与金币兑换页一致）
+  // 金币余额：统一用 pointsOf() 取值（兼容 total_points / totalPoints 两种字段名）
   // 学习完成+5、运动打卡+3、家务+2；奖励/宠物消费扣减
-  const points = Number(student.total_points) || 0;
+  const points = pointsOf(student);
 
   const ach = computeAchievements({ doneStudy, exCount, streak, points });
 
@@ -64,7 +64,7 @@ export function renderHome(ctx) {
       </div>
       <div class="hero-badges">
         <div class="badge"><span>🔥</span>${streak} 天连续</div>
-        <div class="badge"><span>⭐</span>${points} 积分</div>
+        <div class="badge"><span>⭐</span><span data-points>${points}</span> 积分</div>
       </div>
     </div>
 

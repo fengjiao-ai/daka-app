@@ -15,7 +15,7 @@ const REWARD_ITEMS = [
 
 export async function renderRewards(ctx) {
   const student = await api.getStudent();
-  const pts = student.totalPoints || 0;
+  const pts = api.pointsOf(student);
   const history = await api.listRewards();
 
   ctx.viewEl.innerHTML = `
@@ -24,7 +24,7 @@ export async function renderRewards(ctx) {
 
     <div class="coin-banner">
       <div class="coin-label">我的金币</div>
-      <div class="coin-num">🪙 ${pts}</div>
+      <div class="coin-num">🪙 <span data-points>${pts}</span></div>
       <div class="coin-hint">坚持打卡、完成家务，赚取更多金币</div>
     </div>
 
@@ -66,7 +66,7 @@ export async function renderRewards(ctx) {
       const item = REWARD_ITEMS.find((x) => x.key === btn.dataset.reward);
       if (!item) return;
       const s = await api.getStudent();
-      if (s.totalPoints < item.cost) { toast('金币不足', 'error'); return; }
+      if (api.pointsOf(s) < item.cost) { toast('金币不足', 'error'); return; }
       if (!(await confirmDialog(`是否用 ${item.cost} 金币兑换「${item.key}」？`, '确认兑换'))) return;
       try {
         await api.addPoints(-item.cost);
