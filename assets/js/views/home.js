@@ -33,8 +33,15 @@ export function renderHome(ctx) {
 
   const ach = computeAchievements({ doneStudy, exCount, streak, points });
 
-  const ring = (pct, min, goal, color, label) =>
-    progressRing(pct, { label: formatDuration(min), sub: `/${formatDuration(goal)}`, color, size: 132 });
+  // 圆环：儿童友好版——更粗的描边 + 糖果色轨道 + 自适应字号（"1小时30分"不错位）
+  const ring = (pct, min, goal, color, label) => {
+    const txt = formatDuration(min);
+    const fs = txt.length <= 3 ? 26 : txt.length <= 4 ? 22 : 19;
+    return progressRing(pct, {
+      label: txt, sub: `/${formatDuration(goal)}`, color,
+      size: 132, stroke: 14, fontSize: fs, track: '#eef3ff',
+    });
+  };
 
   const taskRow = (t) => {
     const sm = SUBJECT_MAP[t.subject] || SUBJECT_MAP['其他'];
@@ -59,7 +66,7 @@ export function renderHome(ctx) {
   <section class="page">
     <div class="hero">
       <div>
-        <h1>${greeting()}${esc(student.name)} 👋</h1>
+        <h1>${greeting()}，${esc(student.name)} 👋</h1>
         <p class="muted">${new Date().toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'long' })}</p>
       </div>
       <div class="hero-badges">
@@ -69,8 +76,8 @@ export function renderHome(ctx) {
     </div>
 
     <div class="ring-row">
-      ${ring(studyPct, todayStudyMin, student.study_goal_minutes, '#4f8cff', '学习')}
-      ${ring(exPct, todayExerciseMin, student.exercise_goal_minutes, '#43a047', '运动')}
+      ${ring(studyPct, todayStudyMin, student.study_goal_minutes, '#5b8dff', '学习')}
+      ${ring(exPct, todayExerciseMin, student.exercise_goal_minutes, '#3ddc84', '运动')}
     </div>
 
     <div class="card">

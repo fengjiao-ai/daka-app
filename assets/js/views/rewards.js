@@ -20,7 +20,7 @@ export async function renderRewards(ctx) {
 
   ctx.viewEl.innerHTML = `
   <section class="page">
-    <div class="page-head"><h1>金币兑换</h1></div>
+    <div class="page-head"><h1>🪙 金币兑换</h1></div>
 
     <div class="coin-banner">
       <div class="coin-label">我的金币</div>

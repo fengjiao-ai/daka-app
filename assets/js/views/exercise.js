@@ -32,6 +32,13 @@ function todayStats(records) {
   return { totalMinutes, totalCalories, completedCount };
 }
 
+/** 组数/次数文案：无数据时不显示，避免出现 "undefined组undefined次" */
+function setsRepsText(t) {
+  const s = Number(t?.sets) || 0;
+  const r = Number(t?.reps) || 0;
+  return (s || r) ? `${s}组${r}次 · ` : '';
+}
+
 export function renderExercise(ctx) {
   const allRecs = ctx.state.exerciseRecords;
 
@@ -57,7 +64,7 @@ export function renderExercise(ctx) {
       <span class="task-ico" style="background:#4f8cff1a">${em.icon}</span>
       <span class="task-main">
         <b>${em.key}</b>
-        <small>${formatDuration(t.duration_minutes)} · ${t.sets}组${t.reps}次 · ${it}强度 · ${Math.round(t.calories)}kcal</small>
+        <small>${formatDuration(t.duration_minutes)} · ${setsRepsText(t)}${it}强度 · ${Math.round(t.calories)}kcal</small>
       </span>
       <span class="row-actions">
         <button class="icon-btn" data-act="edit" title="编辑">✎</button>
@@ -78,7 +85,7 @@ export function renderExercise(ctx) {
   <section class="page">
     <!-- 页头 -->
     <div class="page-head">
-      <h1>运动打卡</h1>
+      <h1>🏃 运动打卡</h1>
       <div class="head-right">
         <span class="head-time">${new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}</span>
         <button class="btn btn-circle primary" id="add-ex">＋</button>
@@ -87,7 +94,7 @@ export function renderExercise(ctx) {
 
     <!-- 今日概览卡片 -->
     <div class="card ex-summary-card">
-      <div class="ex-summary-head">运动打卡</div>
+      <div class="ex-summary-head">🎯 今日运动概览</div>
       <div class="ex-summary-body">
         <div class="ex-summary-left">
           <div class="ex-label">今日运动</div>

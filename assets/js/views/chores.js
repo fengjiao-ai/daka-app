@@ -36,7 +36,7 @@ export async function renderChores(ctx) {
 
   ctx.viewEl.innerHTML = `
   <section class="page">
-    <div class="page-head"><h1>家务任务</h1></div>
+    <div class="page-head"><h1>🧹 家务任务</h1></div>
 
     <div class="coin-banner" style="background:linear-gradient(135deg,#34c75915,#007aff22)">
       <div class="chore-top">
@@ -85,7 +85,7 @@ function choreRow(item, id) {
       <div class="chore-name">${esc(item.key)}</div>
       <div class="chore-coin">+2 🪙</div>
     </div>
-    <button class="chore-toggle ${item.done ? 'on' : ''}">${item.done ? '✅' : '⭕'}</button>
+    <button class="chore-toggle ${item.done ? 'on' : ''}">✓</button>
   </div>`;
 }
 

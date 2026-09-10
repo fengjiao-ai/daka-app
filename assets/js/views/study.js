@@ -77,7 +77,7 @@ export function renderStudy(ctx) {
   <section class="page">
     <!-- 页头 -->
     <div class="page-head">
-      <h1>学习打卡</h1>
+      <h1>📖 学习打卡</h1>
       <div class="head-right">
         <span class="head-time">${new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}</span>
         <button class="btn btn-circle primary" id="add-study">＋</button>
@@ -86,7 +86,7 @@ export function renderStudy(ctx) {
 
     <!-- 今日概览卡片 -->
     <div class="card ex-summary-card">
-      <div class="ex-summary-head">学习打卡</div>
+      <div class="ex-summary-head">🎯 今日学习概览</div>
       <div class="ex-summary-body">
         <div class="ex-summary-left">
           <div class="ex-label">今日学习</div>

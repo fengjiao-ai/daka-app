@@ -143,18 +143,18 @@ export function esc(s) {
 }
 
 // SVG 圆环进度（运动/学习概览卡片复用）
-export function ringSVG(percent, size = 80, strokeWidth = 8) {
+export function ringSVG(percent, size = 80, strokeWidth = 10) {
   const r = (size - strokeWidth) / 2;
   const cx = size / 2;
   const cy = size / 2;
   const circumference = 2 * Math.PI * r;
   const dashOffset = circumference * (1 - Math.min(percent, 100) / 100);
-  const color = percent >= 100 ? '#43a047' : '#ff9500';
+  const color = percent >= 100 ? '#2eb864' : '#ff9f00';
   return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
-    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#fff3e6" stroke-width="${strokeWidth}"/>
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#ffe8cc" stroke-width="${strokeWidth}"/>
     <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="${strokeWidth}"
       stroke-linecap="round" stroke-dasharray="${circumference}" stroke-dashoffset="${dashOffset}"
       transform="rotate(-90 ${cx} ${cy})" style="transition:stroke-dashoffset .6s ease"/>
-    <text x="${cx}" y="${cy + 6}" text-anchor="middle" font-size="16" font-weight="800" fill="${color}">${Math.round(percent)}%</text>
+    <text x="${cx}" y="${cy + 6}" text-anchor="middle" font-size="17" font-weight="800" fill="${color}">${Math.round(percent)}%</text>
   </svg>`;
 }

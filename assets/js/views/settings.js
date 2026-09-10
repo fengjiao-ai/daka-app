@@ -24,7 +24,7 @@ export function renderSettings(ctx) {
 
   ctx.viewEl.innerHTML = `
   <section class="page">
-    <div class="page-head"><h1>设置</h1></div>
+    <div class="page-head"><h1>⚙️ 设置</h1></div>
 
     <div class="card conn-card ${cloud ? 'ok' : ''}">
       <div class="card-head"><h2>数据同步</h2></div>

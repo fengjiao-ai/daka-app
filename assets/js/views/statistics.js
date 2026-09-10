@@ -75,7 +75,7 @@ export async function renderStatistics(ctx) {
 
   ctx.viewEl.innerHTML = `
   <section class="page">
-    <div class="page-head"><h1>统计分析</h1></div>
+    <div class="page-head"><h1>📊 统计分析</h1></div>
     <div class="filter-bar"><div class="chips">${rangeBtns}</div></div>
 
     <div class="stat-cards">
