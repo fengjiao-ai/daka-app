@@ -10,10 +10,10 @@ import { DRACOLoader } from 'https://esm.sh/three@0.160.0/examples/jsm/loaders/D
 
 /* ---------- GLB 模型加载器 ---------- */
 const gltfLoader = new GLTFLoader();
-// Draco 解码器：用于加载压缩过的 GLB（解码器从 Google CDN 拉取，无需打包）
+// Draco 解码器：本地托管（draco/ 目录随站点部署），不再依赖外网 CDN，加载更快更稳
 const dracoLoader = new DRACOLoader();
-dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
-dracoLoader.setDecoderConfig({ type: 'js' });
+dracoLoader.setDecoderPath('./draco/');
+dracoLoader.setDecoderConfig({ type: 'wasm' });
 gltfLoader.setDRACOLoader(dracoLoader);
 
 /* ---------- 材质工厂 ---------- */
