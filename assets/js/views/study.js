@@ -178,8 +178,8 @@ function openStudyForm(ctx, t) {
   const html = `
     <form id="study-form" class="form">
       <label>科目</label>
-      <div class="subject-picker">
-        ${SUBJECTS.map((s) => `<button type="button" class="subj ${selSubject === s.key ? 'on' : ''}" data-subj="${s.key}"><span>${s.icon}</span>${s.key}</button>`).join('')}
+      <div class="pick-grid">
+        ${SUBJECTS.map((s) => `<button type="button" class="pick ${selSubject === s.key ? 'on' : ''}" data-subj="${s.key}"><span>${s.icon}</span>${s.key}</button>`).join('')}
       </div>
       <input type="hidden" name="subject" value="${selSubject}"/>
 
@@ -215,9 +215,9 @@ function openStudyForm(ctx, t) {
       const f = body.querySelector('#study-form');
 
       // 科目点选
-      body.querySelectorAll('.subject-picker .subj').forEach((b) => {
+      body.querySelectorAll('.pick-grid .pick').forEach((b) => {
         b.onclick = () => {
-          body.querySelectorAll('.subject-picker .subj').forEach((x) => x.classList.remove('on'));
+          body.querySelectorAll('.pick-grid .pick').forEach((x) => x.classList.remove('on'));
           b.classList.add('on');
           f.subject.value = b.dataset.subj;
         };

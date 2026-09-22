@@ -587,7 +587,7 @@ body:not(.in-app) .tabbar { display: none; }
   .coin-num { font-size: 44px; }
   .ex-minutes { font-size: 40px; }
   .stat-card b { font-size: 17px; }
-  .subject-picker { grid-template-columns: repeat(3, 1fr); }
+  .pick-grid { grid-template-columns: repeat(3, 1fr); }
 }
 
 /* 极窄屏（≤330px）进一步压缩圆环与徽章 */
@@ -619,21 +619,40 @@ body:not(.in-app) .tabbar { display: none; }
 .task-row.done .task-main b { text-decoration: line-through; color: var(--muted); }
 .task-row.done .task-ico { filter: grayscale(.85); }
 
-/* 科目大按钮选择器（点选替代下拉） */
-.subject-picker { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 2px 0 6px; }
-.subject-picker .subj {
+/* 通用「点选」按钮组（学习页科目 / 运动页项目、强度 共用） */
+.pick-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 2px 0 6px; }
+.pick-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 2px 0 6px; }
+.pick {
   border: 2px solid var(--line); background: #f8fbff; border-radius: 14px;
   padding: 9px 4px; font-size: 13.5px; font-weight: 800; cursor: pointer;
   display: flex; flex-direction: column; align-items: center; gap: 4px; color: #5a6b8c;
+  font-family: inherit;
   transition: transform .08s, border-color .15s, background .15s, box-shadow .08s;
 }
-.subject-picker .subj span { font-size: 22px; line-height: 1; }
-.subject-picker .subj:active { transform: scale(.95); }
-.subject-picker .subj.on {
+.pick span { font-size: 22px; line-height: 1; }
+.pick:active { transform: scale(.95); }
+.pick.on {
   border-color: var(--primary); background: #eaf1ff; color: var(--primary);
   box-shadow: 0 3px 0 #d7e3ff;
 }
+/* 强度这类不需要图标的，横排更紧凑 */
+.pick-row .pick { flex-direction: row; padding: 11px 6px; gap: 6px; font-size: 14.5px; }
 
 /* 时长快捷选择 */
 .dur-chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 2px 0 8px; }
 .dur-chips .chip { padding: 8px 14px; font-size: 14px; }
+
+/* ============================ 运动页：卡路里实时预览 & 折叠进阶项 ============================ */
+.cal-preview {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  background: linear-gradient(135deg, #fff4e0, #ffe9f1);
+  border-radius: 16px; padding: 12px; margin: 6px 0 2px;
+  animation: cardIn .3s ease;
+}
+.cal-preview .cal-ico { font-size: 24px; }
+.cal-preview b { font-size: 28px; font-weight: 800; color: #ff9f00; line-height: 1; }
+.cal-preview small { font-size: 13px; font-weight: 800; color: #b8860b; }
+
+/* 折叠进阶项（组数/次数/体重） */
+.more-toggle { margin: 8px 0 4px; }
+.more-box { padding-top: 2px; animation: cardIn .25s ease; }
