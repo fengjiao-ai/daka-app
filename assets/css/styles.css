@@ -587,6 +587,7 @@ body:not(.in-app) .tabbar { display: none; }
   .coin-num { font-size: 44px; }
   .ex-minutes { font-size: 40px; }
   .stat-card b { font-size: 17px; }
+  .subject-picker { grid-template-columns: repeat(3, 1fr); }
 }
 
 /* 极窄屏（≤330px）进一步压缩圆环与徽章 */
@@ -594,3 +595,45 @@ body:not(.in-app) .tabbar { display: none; }
   .ring-row { transform: scale(.88); transform-origin: top center; }
   .badge { font-size: 11px; padding: 5px 9px; }
 }
+
+/* ============================ 学习页：一键完成 & 简化表单 ============================ */
+/* 任务行完成勾选按钮（虚线空圈 → 点击绿色打勾） */
+.check-toggle {
+  width: 44px; height: 44px; border-radius: 50%;
+  border: 2.5px dashed #ccd6ea; background: #f8fbff;
+  color: #bcc6db; font-size: 22px; font-weight: 800; line-height: 1;
+  flex: 0 0 auto; cursor: pointer;
+  display: grid; place-items: center;
+  transition: transform .12s, background .2s, border-color .2s;
+}
+.check-toggle:active { transform: scale(.88); }
+.check-toggle.on {
+  border: 2.5px solid transparent;
+  background: linear-gradient(180deg, #5be59a, #2eb864);
+  color: #fff; box-shadow: 0 3px 0 var(--press-green);
+  animation: achPop .3s ease;
+}
+
+/* 已完成的任务行：置灰 + 划线 + 图标去色 */
+.task-row.done { opacity: .62; background: linear-gradient(180deg, #f2fdf6, #fbfeff); }
+.task-row.done .task-main b { text-decoration: line-through; color: var(--muted); }
+.task-row.done .task-ico { filter: grayscale(.85); }
+
+/* 科目大按钮选择器（点选替代下拉） */
+.subject-picker { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 2px 0 6px; }
+.subject-picker .subj {
+  border: 2px solid var(--line); background: #f8fbff; border-radius: 14px;
+  padding: 9px 4px; font-size: 13.5px; font-weight: 800; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 4px; color: #5a6b8c;
+  transition: transform .08s, border-color .15s, background .15s, box-shadow .08s;
+}
+.subject-picker .subj span { font-size: 22px; line-height: 1; }
+.subject-picker .subj:active { transform: scale(.95); }
+.subject-picker .subj.on {
+  border-color: var(--primary); background: #eaf1ff; color: var(--primary);
+  box-shadow: 0 3px 0 #d7e3ff;
+}
+
+/* 时长快捷选择 */
+.dur-chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 2px 0 8px; }
+.dur-chips .chip { padding: 8px 14px; font-size: 14px; }
